@@ -74,7 +74,7 @@ The R squared is .035 and it tells us how much variation in overall score is exp
 
 # Exercise 9
 
-```{r}
+```{r gender-model}
 m_gen <- lm(score ~ gender, data=evals)  
 
 print(m_gen)
@@ -90,7 +90,7 @@ score = 4.09 + (1*.1415)
 females:
 score = 4.09 + (0*.1415)
 
-```{r}
+```{r gender-plot}
 evals %>%
   ggplot(aes(x = gender , y = score ,  color = gender)) +
   geom_point()
@@ -114,7 +114,7 @@ the intercept = 4.28, this is a professors score at level 0 0 (aka teaching trac
 slope 1 = -.1297, this is how much a professors score decreases at level 1 0 (in the contrast matrix, this is a tenure track professor)
 slope 2 = -.1452, this is how much a professors score decreases at level 0 1 (tenured)
 
-```{r}
+```{r rank-model}
 m_rank <- lm(score ~ rank, data=evals)  
 
 print(m_rank)
@@ -127,7 +127,7 @@ head(model.matrix(m_rank), 20)
 ```
 
 
-```{r}
+```{r plot-for-confirmation}
 evals %>%
   ggplot(aes(x = rank , y = score ,  color = gender)) +
   geom_point()+
@@ -138,7 +138,7 @@ evals %>%
 
 # Exercise 12
 
-```{r}
+```{r relevel}
 evals_relevel <- evals %>% 
   mutate(rank_relevel = relevel(rank, ref = "tenure track"))
 ```
@@ -146,7 +146,7 @@ evals_relevel <- evals %>%
 
 # Exercise 13
 
-```{r}
+```{r relevel-model}
 
 m_rank_relevel <- lm(score ~ rank_relevel, data=evals_relevel)
 summary(m_rank_relevel)
@@ -177,3 +177,30 @@ the intercept = 4.15, this is a professors score at level 0 0 (aka tenure track)
 slope 1 = .1297, this is how much a professors score increases at level 1 0 (in the new contrast matrix, this is a teaching track professor)
 slope 2 = -.015, this is how much a professors score decreases at level 0 1 (tenured)
 R2=.007, this means the linear model shows that teaching position explains .7% of the variance in score.
+
+# exercise 14
+
+```{r recode}
+evals <- evals %>% 
+  mutate(tenure_eligible = recode(rank, "tenure track" = "yes" ,
+                                  "tenured" = "yes" ,
+                                  "teaching" = "no"
+  ))
+```
+
+```{r confirm-it-worked}
+head(evals)
+```
+
+#exercise 15
+
+```{r}
+m_tenure_eligible <- lm(score ~ tenure_eligible, data=evals)
+summary(m_tenure_eligible)
+```
+
+
+score = 4.28 + (-.14*x)
+for tenure eligible, that means 4.14 and for tenure non-eligible, 4.28. The slope is the amount that score goes down for those who are tenure eligible. Since tenure eligibility is categorical, this shows the average score for those two groups.
+R-squared is .009, so tenure eligibility explains .9% of the variance in score.
+
