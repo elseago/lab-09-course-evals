@@ -1,7 +1,7 @@
 ---
 title: "Lab 09 - Grading the professor, Pt. 1"
-author: "Insert your name here"
-date: "Insert date here"
+author: "Elayna Seago"
+date: "03/15/22"
 output: github_document
 ---
 
@@ -14,17 +14,166 @@ library(openintro)
 ```
 
 ### Exercise 1
+Yes, the distribution of scores is skewed negatively. The majority of students evaluate professors as performing well. I expected to see more of a binomial distribution because I thought students who really liked or really dislike the course would be the primary respondents.
+```{r}
+evals %>%
+  ggplot(aes(x = score)) +
+  geom_histogram()
+```
 
-Remove this text, and add your answer for Exercise 1 here.
-Add code chunks as needed.
-Don't forget to label your code chunk.
-Do not use spaces in code chunk labels.
 
 ### Exercise 2
+There does not really appear to be much of a linear relationship here.
+```{r}
+evals %>%
+  ggplot(aes(x = bty_avg , y = score)) +
+  geom_point()
+```
 
-...
+# Exercise 3
+The original graph hid some repeat points on the right side of the graph. The relationship looks a little more positive and linear now. Jitter adds a little random shift to the points to minimize overlap.
+```{r}
+evals %>%
+  ggplot(aes(x = bty_avg , y = score)) +
+  geom_point()+
+  geom_jitter()
+```
 
-Add exercise headings as needed.
+# Exercise 4
+score = 3.88 + bty_avg*.067
+```{r}
+m_bty <- lm(score ~ bty_avg, data=evals)  
 
-## 
-For Exercise 12, relevel() function can be helpful! 
+print(m_bty)
+
+summary(m_bty)
+```
+
+# Exercise 5
+
+```{r}
+evals %>%
+  ggplot(aes(x = bty_avg , y = score)) +
+  geom_point()+
+  geom_jitter()+
+  geom_smooth( method = lm , se = FALSE , color = "orange")
+```
+
+# Exercise 6
+The slope is .0664, so for every 1 point a professors attractiveness rating goes up, there overall evaluation score is expected to increase .0664.
+# Exercise 7
+The intercept is 3.88, so a professor with an attractiveness rating of 0 would still be expected to have an overall rating of 3.88.
+# Exercise 8
+
+```{r}
+summary(m_bty)$r.squared
+```
+
+
+The R squared is .035 and it tells us how much variation in overall score is explained by beauty rating.
+
+# Exercise 9
+
+```{r}
+m_gen <- lm(score ~ gender, data=evals)  
+
+print(m_gen)
+
+summary(m_gen)
+```
+
+# Exercise 10
+
+males:
+score = 4.09 + (1*.1415)
+
+females:
+score = 4.09 + (0*.1415)
+
+```{r}
+evals %>%
+  ggplot(aes(x = gender , y = score ,  color = gender)) +
+  geom_point()
+```
+
+
+# Exercise 11
+
+#score = 4.28 + (-.1297*x1) + (-.1452*x2)
+
+teaching track:
+score= 4.28 + (0) + (0)
+
+tenure track:
+score = 4.28 + (1*-.1297) + (0)
+
+tenured:
+score = 4.28 + (0) + (1*-.1452)
+
+the intercept = 4.28, this is a professors score at level 0 0 (aka teaching track)
+slope 1 = -.1297, this is how much a professors score decreases at level 1 0 (in the contrast matrix, this is a tenure track professor)
+slope 2 = -.1452, this is how much a professors score decreases at level 0 1 (tenured)
+
+```{r}
+m_rank <- lm(score ~ rank, data=evals)  
+
+print(m_rank)
+
+summary(m_rank)
+```
+
+```{r}
+head(model.matrix(m_rank), 20) 
+```
+
+
+```{r}
+evals %>%
+  ggplot(aes(x = rank , y = score ,  color = gender)) +
+  geom_point()+
+  geom_jitter()
+```
+
+
+
+# Exercise 12
+
+```{r}
+evals_relevel <- evals %>% 
+  mutate(rank_relevel = relevel(rank, ref = "tenure track"))
+```
+
+
+# Exercise 13
+
+```{r}
+
+m_rank_relevel <- lm(score ~ rank_relevel, data=evals_relevel)
+summary(m_rank_relevel)
+
+```
+
+#initial lm
+teaching track:
+score= 4.28 + (0)=4.28
+
+tenure track:
+score = 4.28 + (1*-.1297)=4.15
+
+tenured:
+score = 4.28 + (1*-.1452)=4.13
+
+#new lm
+teaching track:
+score= 4.15 + (1*.129)=4.279
+
+tenure track:
+score= 4.15 + (0)=4.15
+
+tenured:
+score= 4.15 + (1*-.015)=4.13
+
+the intercept = 4.15, this is a professors score at level 0 0 (aka tenure track)
+slope 1 = .1297, this is how much a professors score increases at level 1 0 (in the new contrast matrix, this is a teaching track professor)
+slope 2 = -.015, this is how much a professors score decreases at level 0 1 (tenured)
+R2=.007, this means the linear model shows that teaching position explains .7% of the variance in score.

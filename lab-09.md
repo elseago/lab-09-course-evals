@@ -1,7 +1,7 @@
 Lab 09 - Grading the professor, Pt. 1
 ================
-Insert your name here
-Insert date here
+Elayna Seago
+03/15/22
 
 ### Load packages and data
 
@@ -22,3 +22,7 @@ spaces in code chunk labels.
 …
 
 Add exercise headings as needed.
+
+## 
+
+For Exercise 12, relevel() function can be helpful!
